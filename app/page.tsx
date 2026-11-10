@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   FileText,
   ShieldAlert,
@@ -42,6 +43,9 @@ export default function Dashboard() {
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
+  // User Session
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; avatar?: string } | null>(null);
 
   // Plan State (Free by default, but voice calls work on BOTH!)
   const [userPlan, setUserPlan] = useState<"FREE" | "PRO">("FREE");
@@ -98,6 +102,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("paypilot_user");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setCurrentUser(parsed);
+          if (parsed.plan) setUserPlan(parsed.plan);
+        } catch (e) {}
+      }
+    }
   }, []);
 
   // Call timer simulation
@@ -333,6 +347,33 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center space-x-3">
+          {currentUser ? (
+            <div className="flex items-center space-x-2 px-2.5 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-xs">
+              <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                {currentUser.name.charAt(0)}
+              </div>
+              <span className="hidden md:inline text-slate-200 font-medium">{currentUser.name}</span>
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") localStorage.removeItem("paypilot_user");
+                  setCurrentUser(null);
+                }}
+                className="text-slate-400 hover:text-rose-400 text-[10px] ml-1"
+                title="Sign Out"
+              >
+                (Exit)
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm transition"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Login</span>
+            </Link>
+          )}
+
           {/* Plan Badge (Free or Pro) */}
           <button
             onClick={() => setShowPricingModal(true)}

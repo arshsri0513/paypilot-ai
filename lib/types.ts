@@ -46,3 +46,12 @@ export interface ChatMessage {
   actionRequired?: boolean;
   actionData?: any;
 }
+
+export interface VoiceCallSession {
+  callSid: string;
+  phoneNumber: string;
+  purpose: "payment_reminder" | "invoicing" | "fraud_alert" | "general";
+  status: "IDLE" | "RINGING" | "CONNECTED" | "COMPLETED";
+  durationSeconds: number;
+  transcript: { speaker: "agent" | "caller"; text: string; time: string }[];
+}
